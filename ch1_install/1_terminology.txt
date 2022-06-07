@@ -1,0 +1,68 @@
+------------------------------------------------
+
+Database
+  => 데이터 창고
+
+
+SQL (Structured Query Language)
+  => db와 소통하기 위한 언어
+
+------------------------------------------------
+
+Table
+  => 엑셀의 시트
+  => 행과열로 구성됨
+
+row (record)       : 행
+column (attribute) : 열
+
+------------------------------------------------
+
+CRUD (create, read, update, delete)
+
+------------------------------------------------
+
+1. postgresql.org에서 설치
+2. postgres
+
+------------------------------------------------
+
+1. 맥도날드 db를 생성
+2. 아래의 쿼리를 이용하여 테이블을 생성
+
+CREATE TABLE burgers(
+  id INT,
+  name VARCHAR(50),
+  price INT,
+  gram INT,
+  kcal INT,
+  protein INT
+); 
+
+------------------------------------------------
+
+-- 주석 : 실행되지 않는 쿼리(설명을 위한것)
+
+------------------------------------------------
+
+-- 단일행 삽입
+INSERT INTO 
+    burgers(id, name, price, gram, kcal, protein)
+VALUES 
+    (1, '행운버거 골드 스페셜', 6000, 227, 669, 26);
+
+
+-- 여러행 동시에 삽입
+INSERT INTO 
+    burgers(id, name, price, gram, kcal, protein)
+VALUES 
+    (2, '행운버거 골드', 5300, 222, 540, 25),
+    (3, '트리플 치즈버거', 6300, 219, 619, 36),
+    (4, '빅맥', 5300, 223, 583, 27);
+
+
+
+SELECT 
+    *
+FROM 
+    burgers
