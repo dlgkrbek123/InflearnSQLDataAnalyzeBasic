@@ -66,3 +66,23 @@ SELECT
     *
 FROM 
     burgers
+
+
+UPDATE 
+    burgers
+SET
+    price = 1000;
+
+
+UPDATE
+    burgers
+SET 
+    price = 500
+WHERE
+    id = 4;
+
+
+DELETE FROM
+    burgers
+WHERE 
+    id = 4;
