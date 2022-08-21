@@ -1,0 +1,91 @@
+------------------------------------------------
+
+1대다 관계 (one to many)
+- 하나의 데이터가 여러개의 데이터를 포함
+- 인스타그램 계정과 여러개의 이미지
+- 기사의 댓글
+
+
+PK와 FK를 통해 관계가 형성
+
+Primary Key
+- one에 해당하는 테이블의 레코드 id
+- 하나의 레코드를 대표하는 unique key
+- db에 의해 자동 생성
+
+Foreign Key
+- many에 해당하는 테이블에서 PK를 나타내는 컬럼
+- 관계를 형성하는 핵심키
+
+------------------------------------------------
+
+CREATE TABLE users (
+  id SERIAL PRIMARY KEY,
+  nickname VARCHAR(50),
+  email VARCHAR(100)
+);
+
+INSERT INTO
+  users(nickname, email)
+VALUES
+  ('cloudstudying_kr', 'mail@cloudstudying.kr'),
+  ('hongpark_cs',      'sehongpark@cloudstudying.kr'),
+  ('haesamq',          'haesamq@naver.com')
+;
+
+------------------------------------------------
+
+-- photos 테이블 생성
+CREATE TABLE photos (
+  id       SERIAL        PRIMARY KEY, -- PK
+  filename VARCHAR(255),
+  user_id  INTEGER       REFERENCES users(id) -- FK: 사진 게시자의 PK로 연결
+);
+
+INSERT INTO
+  photos(filename, user_id)
+VALUES
+  -- 1번 유저의 사진 업로드
+  ('cat-on-road.jpg',           1),
+  ('sunset-over-the-ocean.jpg', 1),
+  ('andromeda-galaxy.jpg',      1),
+  -- 2번 유저의 사진 업로드 
+  ('white-tiger.jpg',        2),
+  ('nero-the-black-cat.jpg', 2)
+;
+
+------------------------------------------------
+
+
+
+
+
+
+
+------------------------------------------------
+
+1대1
+- 데이터가 1대1로 매칭
+- 국가 <=> 수도
+- 범위가 작거나 사용빈도가 적은곳에 FK를 설정
+
+------------------------------------------------
+
+-- settings 테이블 생성
+CREATE TABLE settings (
+  id            SERIAL       PRIMARY KEY,                -- PK
+  private       BOOLEAN,                                 -- true/false
+  adding_photos VARCHAR(15),                             -- AUTO, MANUAL
+  user_id       INTEGER      UNIQUE REFERENCES users(id) -- FK: 개인설정 유저(1:1 연결)
+);
+
+-- settings 레코드 등록
+INSERT INTO
+  settings(private, adding_photos, user_id)
+VALUES
+  (FALSE, 'MANUAL', 1), -- 유저#1
+  (FALSE, 'AUTO',   2), -- 유저#2
+  (TRUE,  'AUTO',   3)  -- 유저#3
+;
+
+------------------------------------------------
