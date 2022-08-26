@@ -1,0 +1,31 @@
+------------------------------------------------
+
+- 모든사진의 파일명을 조회 게시자가 있으면 닉네임
+
+SELECT
+  photos.filename, users.nickname
+FROM 
+  photos
+LEFT JOIN users ON
+  photos.user_id = users.id
+;
+
+------------------------------------------------
+
+- 모든 댓글 내용을 조회, 댓글이달린 사진의 파일명도
+
+SELECT
+  comments.*, photos.filename
+FROM
+  comments
+LEFT JOIN photos ON
+  comments.photo_id = photos.id
+;
+
+
+------------------------------------------------
+
+
+
+
+------------------------------------------------
