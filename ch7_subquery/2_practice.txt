@@ -1,0 +1,227 @@
+------------------------------------------------
+
+/* 테이블 생성 */
+-- 학생
+CREATE TABLE students (
+  id       SERIAL      PRIMARY KEY, -- PK
+  nickname VARCHAR(30)              -- 닉네임
+);
+-- 과목
+CREATE TABLE courses (
+  id    SERIAL      PRIMARY KEY, -- PK
+  title VARCHAR(60)              -- 과목명
+);
+-- 등급 점수
+CREATE TABLE grade_points (
+  grade VARCHAR(15)   PRIMARY KEY, -- PK
+  point DECIMAL(3, 2)              -- 학점
+);
+-- 수강성적
+CREATE TABLE grades (
+  id         SERIAL      PRIMARY KEY,                   -- PK
+  student_id INTEGER     REFERENCES students(id),       -- FK
+  course_id  INTEGER     REFERENCES courses(id),        -- FK
+  exam_score INTEGER,                                   -- 시험점수
+  grade      VARCHAR(15) REFERENCES grade_points(grade) -- 성적 등급
+);
+/* 레코드 등록 */
+-- 학생
+INSERT INTO
+  students(nickname)
+VALUES
+  ('홍팍'),
+  ('쿠마'),
+  ('호크'),
+  ('젤리'),
+  ('알파고'),
+  ('베이글'),
+  ('라이언')
+;
+-- 과목
+INSERT INTO
+  courses(title)
+VALUES
+  ('프로그래밍'),
+  ('대학 수학'),
+  ('영작문'),
+  ('글쓰기'),
+  ('물리와 실험'),
+  ('사고와 표현'),
+  ('공학 윤리')
+;
+-- 등급 점수
+INSERT INTO
+  grade_points(grade, point)
+VALUES
+  ('A+', 4.5),
+  ('A0', 4.0),
+  ('B+', 3.5),
+  ('B0', 3.0),
+  ('C+', 2.5),
+  ('C0', 2.0),
+  ('D0', 1.5),
+  ('F',  0.0)
+;
+-- 수강성적
+INSERT INTO
+  grades(student_id, course_id, exam_score, grade)
+VALUES
+  (1, 1, 90,  'A0'),
+  (2, 1, 97,  'A+'),
+  (3, 1, 100, 'A+'),
+  (4, 1, 98,  'A+'),
+  (5, 1, 64,  'D0'),
+  (6, 1, 81,  'B+'),
+  (7, 1, 79,  'B+'),
+  (1, 2, 88,  'A0'),
+  (2, 2, 99,  'A+'),
+  (3, 2, 82,  'B+'),
+  (4, 2, 68,  'C+'),
+  (5, 2, 76,  'B0'),
+  (6, 2, 63,  'C0'),
+  (7, 2, 71,  'C+'),
+  (1, 3, 76,  'B+'),
+  (2, 3, 72,  'B+'),
+  (3, 3, 79,  'B+'),
+  (4, 3, 83,  'A0'),
+  (5, 3, 91,  'A+'),
+  (6, 3, 69,  'B0'),
+  (7, 3, 84,  'A0'),
+  (1, 4, 90,  'A0'),
+  (2, 4, 82,  'B+'),
+  (3, 4, 88,  'A0'),
+  (4, 4, 99,  'A+'),
+  (5, 4, 68,  'C+'),
+  (6, 4, 94,  'A+'),
+  (7, 4, 60,  'C0'),
+  (1, 5, 66,  'B0'),
+  (2, 5, 78,  'A0'),
+  (3, 5, 73,  'B+'),
+  (4, 5, 84,  'A+'),
+  (5, 5, 76,  'A0'),
+  (6, 5, 84,  'A+'),
+  (7, 5, 71,  'B+'),
+  (1, 6, 79,  'B+'),
+  (2, 6, 89,  'A0'),
+  (3, 6, 96,  'A+'),
+  (4, 6, 82,  'B+'),
+  (5, 6, 91,  'A0'),
+  (6, 6, 100, 'A+'),
+  (7, 6, 70,  'C+'),
+  (1, 7, 99,  'A+'),
+  (2, 7, 94,  'A0'),
+  (3, 7, 60,  'C0'),
+  (4, 7, 68,  'C+'),
+  (5, 7, 75,  'B0'),
+  (6, 7, 81,  'B0'),
+  (7, 7, 89,  'B+')
+;
+
+------------------------------------------------
+
+SELECT
+  students.nickname,
+  courses.title,
+  grades.exam_score,
+  grade_points.grade
+FROM
+  students
+JOIN grades ON
+  students.id = grades.student_id
+JOIN courses ON
+  courses.id = grades.course_id
+JOIN grade_points ON
+  grades.grade = grade_points.point
+WHERE
+  (nickname, title, exam_score, grade_points.grade, point) IN (
+    ('홍팍', '프로그래밍', 80, 'A0', 4.0)
+  )
+;
+
+------------------------------------------------
+
+- 강의별 평균 시험 점수
+
+SELECT
+  courses.title,
+  AVG(exam_score)
+FROM
+  courses
+LEFT JOIN grades ON
+  grades.course_id = courses.id
+GROUP BY
+  courses.title
+;
+
+
+/* 서브쿼리 사용한 버전 */
+SELECT
+  courses.title,
+  avg_exam_score.score
+FROM
+  courses
+JOIN (
+  SELECT
+    course_id,
+    ROUND(AVG(exam_score), 2) AS "score"
+  FROM 
+    grades
+  GROUP BY 
+    course_id
+) avg_exam_score ON
+  courses.id = avg_exam_score.course_id
+;
+  
+------------------------------------------------
+
+- 3.5보다 학점이 낮은 학생
+
+SELECT
+  students.nickname AS "닉네임",
+  student_avg_point.avg_point AS "평균 학점"
+FROM
+  students
+JOIN (
+  SELECT
+    student_id,
+    ROUND(AVG(grade_points.point), 2) AS "avg_point"
+  FROM
+    grades
+  JOIN grade_points ON
+    grades.grade = grade_points.grade
+  GROUP BY
+    student_id
+  HAVING
+    AVG(grade_points.point) < 3.5
+) AS student_avg_point ON
+  students.id = student_avg_point.student_id
+;
+  
+------------------------------------------------
+
+- 학점을 후하게 준 강의 TOP3
+
+SELECT
+  courses.title,
+  ts.avg_point
+FROM
+  courses
+JOIN (
+  SELECT
+    course_id,
+    ROUND(AVG(grade_points.point), 2) AS "avg_point"
+  FROM 
+    grades
+  JOIN grade_points ON
+    grades.grade = grade_points.grade
+  GROUP BY 
+    course_id
+  ORDER BY 
+    AVG(grade_points.point) DESC
+  LIMIT
+    3
+) AS ts ON
+  courses.id = ts.course_id
+;
+
+------------------------------------------------

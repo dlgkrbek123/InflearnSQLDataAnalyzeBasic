@@ -1,0 +1,151 @@
+------------------------------------------------
+
+서브쿼리 (nested query)
+- 앞서 수행된 쿼리 결과를 이용해서 다시 쿼리를 수행
+- 세미콜론이 포함되면 안됨!!!!
+
+- SELECT, FROM, WHERE, JOIN에서 사용
+  => SELECT에서 쓰이는 경우 단일값만 사용가능
+  => FROM, JOIN절에 사용될 경우 별칭을 지정해야 함
+  => WHERE (N X 1만 가능)
+
+- IN, ALL, ANY
+=> where 서브쿼리에서 행이 여러개인 경우 사용
+
+------------------------------------------------
+
+SELECT절 서브쿼리(단일값, 1x1)
+
+- 음료의 가장비싼 음료와의 가격차이
+
+SELECT
+  name,
+  price,
+  price - (
+    SELECT 
+      MAX(price) 
+    FROM 
+      beverages 
+  )
+FROM 
+  beverages
+;
+
+------------------------------------------------
+
+FROM, JOIN 서브쿼리(MxN)
+
+- 주문내역에서 주문별 음료 개수의 평균
+
+SELECT 
+  AVG(sum) AS "주문 별 음료 개수 평균"
+FROM (
+  SELECT
+    order_id,
+    SUM(count) AS 's'
+  FROM
+    order_details
+  GROUP BY
+    order_id
+) AS "주문 별 음료 개수 집계"
+
+- 음료별 주문 개수
+
+SELECT
+  name,
+  COALESCE(total_count, 0)
+FROM
+  beverages
+LEFT JOIN (
+  SELECT 
+    beverage_id,
+    SUM(count) AS "total_count"
+  FROM
+    order_details
+  GROUP BY
+    beverage_id
+) AS b_counts ON
+  b_counts.beverage_id = beverages.id
+;
+
+------------------------------------------------
+
+WHERE 서브쿼리(N x 1)
+
+- 평균가격보다 비싼 음료를 조회
+
+SELECT
+  name,
+  price
+FROM
+  beverages
+WHERE
+  price > (
+    SELECT
+      AVG(price)
+    FROM
+      beverages
+  )
+;
+
+- 가장 잘팔리는 음료 3개
+
+SELECT
+  id,
+  name
+FROM
+  beverages
+WHERE
+  id IN (
+    SELECT
+      beverage_id
+    FROM
+      order_details
+    GROUP BY
+      beverage_id
+    ORDER BY 
+      SUM(count) DESC
+    LIMIT
+      3
+  )
+;
+
+- 아메리카노와 라뗴보다 가격이 싼 음료
+
+SELECT
+  name,
+  price
+FROM 
+  beverages
+WHERE
+  price < ALL(
+    SELECT
+      price
+    FROM
+      beverages
+    WHERE
+      name IN ('아메리카노', '라떼')
+  )
+;
+
+- 커피류보다 비싼 다른 음료
+
+SELECT
+  name,
+  price
+FROM
+  beverages
+WHERE 
+  btype != 'COFFEE'
+    AND
+  price > ANY(
+    SELECT
+      price
+    FROM
+      beverages
+    WHERE
+      btype = 'COFFEE'
+  )
+;
+
+------------------------------------------------
